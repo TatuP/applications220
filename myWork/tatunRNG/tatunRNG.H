@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,9 @@ License
 
 Class
     Foam::compressible::RASModels::tatunRNG
+
+Group
+    grpCmpRASTurbulence
 
 Description
     Renormalisation group k-epsilon turbulence model for compressible flows.
@@ -51,8 +54,7 @@ SourceFiles
 #ifndef compressibletatunRNG_H
 #define compressibletatunRNG_H
 
-//#include "RASModel.H"
-#include "/opt/openfoam211/src/turbulenceModels/compressible/RAS/RASModel/RASModel.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,6 +98,7 @@ protected:
             volScalarField alphat_;
 	    volScalarField soundSpeed_;
 
+
 public:
 
     //- Runtime type information
@@ -109,7 +112,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel,
+            const fluidThermo& thermophysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName,
             const word& modelName = typeName
         );
@@ -164,14 +167,15 @@ public:
             return epsilon_;
         }
 
-	virtual tmp<volScalarField> soundSpeed() const
-	{
-		return soundSpeed_;
-	}
+        virtual tmp<volScalarField> soundSpeed() const
+        {
+            return soundSpeed_;
+        }
+
         //- Return the Reynolds stress tensor
         virtual tmp<volSymmTensorField> R() const;
 
-        //volScalarField& M //- Return the effective stress tensor including the laminar stress
+        //- Return the effective stress tensor including the laminar stress
         virtual tmp<volSymmTensorField> devRhoReff() const;
 
         //- Return the effective stress tensor including the laminar stress
@@ -182,9 +186,6 @@ public:
 
         //- Read RASProperties dictionary
         virtual bool read();
-
-	
-
 };
 
 

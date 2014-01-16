@@ -1,4 +1,4 @@
-maxCo = 
+//maxCo = 
 word usedTimeScheme("localEuler");
 bool useLocalEuler = true;
 if (mesh.schemesDict().readIfPresent("usedTimeScheme", usedTimeScheme))

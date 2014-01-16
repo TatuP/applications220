@@ -41,7 +41,7 @@ EDM<CombThermoType, ThermoType>::EDM
     singleStepCombustion<CombThermoType, ThermoType>(modelType, mesh),
     //xIgnition_(readScalar(this->coeffs().lookupOrDefault("xIgnition",-0.0156))),
     xIgnition_(this->coeffs().lookupOrDefault("xIgnition",-0.0156)),
-    C_(readScalar(this->coeffs().lookup("C"))),
+    C_(readScalar(this->coeffs().lookup("C")))
     //runTime_(this->rho().time())
     /*rDeltaT_
     (
@@ -123,17 +123,17 @@ void EDM<CombThermoType, ThermoType>::correct()
     {
        // this->singleMixture_.fresCorrect(); 
 
-        const label fuelI = this->singleMixture_.fuelIndex();
+        const label fuelI = this->singleMixturePtr_->fuelIndex();
         //const label O2I = this->singleMixture_.O2Inde
-        const volScalarField& YFuel = this->thermo_->composition().Y()[fuelI];
+        const volScalarField& YFuel = this->thermoPtr_->composition().Y()[fuelI];
 
-        const dimensionedScalar s = this->singleMixture_.s();
+        const dimensionedScalar s = this->singleMixturePtr_->s();
 
-        if (this->thermo_->composition().contains("O2"))
+        if (this->thermoPtr_->composition().contains("O2"))
         {
 
 	    //const Reaction<ThermoType>& reaction = this->operator[](0);	
-            const volScalarField& YO2 = this->thermo_->composition().Y("O2");
+            const volScalarField& YO2 = this->thermoPtr_->composition().Y("O2");
 	    //volScalarField YPsum = 0.0*YO2;
 	    //this->singleMixture_.calcYprod();
 	    //YPsum = this->singl

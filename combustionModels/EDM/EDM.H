@@ -58,7 +58,7 @@ class EDM
         //- Model constant
 	scalar xIgnition_;
         scalar C_;
-	Time& runTime_;
+	//Time& runTime_;
 	//volScalarField rDeltaT_;
 
 

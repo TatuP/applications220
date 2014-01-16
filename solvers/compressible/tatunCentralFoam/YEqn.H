@@ -12,8 +12,9 @@
 {
 
     //thermo.correct();
-    combustion->correct();
-    dQ = combustion->dQ();
+    //combustion->correct();
+    reaction->correct();
+    dQ = reaction->dQ();//combustion->dQ();
     label inertIndex = -1;
     volScalarField Yt = 0.0*Y[0];
 
@@ -72,7 +73,7 @@
 		fvm::ddt(rho,Yi) - fvc::ddt(rho,Yi)
 	      //+ fvm::div(phi,Yi) - fvc::div(phi,Yi)
 	      - fvm::laplacian(muEff/Sct,Yi) // turbulent Schmidt number 1.0 at the moment 
-	        == combustion->R(Yi) // - RYiPredi/rho (in an ideal case)
+	        == reaction->R(Yi)//combustion->R(Yi) // - RYiPredi/rho (in an ideal case)
 	      ,
 		mesh.solver("Yi")	
             ); 

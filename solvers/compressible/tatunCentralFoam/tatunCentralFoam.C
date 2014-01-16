@@ -34,7 +34,7 @@ Description
 //#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "zeroGradientFvPatchFields.H"
-#include "fixedRhoFvPatchScalarField.H"
+#include "BCs/rho/fixedRhoFvPatchScalarField.H"
 
 //#include "hsCombustionThermo.H" //nakul
 //#include "psiChemistryModel.H" //nakul
@@ -53,7 +53,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "readThermophysicalProperties.H"
     #include "readTimeControls.H"
-    #include "readLocalEuler.H"
+
+	//    #include "readLocalEuler.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -172,14 +173,14 @@ int main(int argc, char *argv[])
 
         #include "compressibleCourantNo.H"
         #include "readTimeControls.H"
-	if (useLocalEuler)
-	{
-		#include "setrDeltaT.H"
-	} 
-	else
-	{
-        	#include "setDeltaT.H"
-	}
+	//if (useLocalEuler)
+	//{
+	//	#include "setrDeltaT.H"
+	//} 
+	//else
+	//{
+        #include "setDeltaT.H"
+	//}
 
         runTime++;
 
@@ -261,7 +262,7 @@ int main(int argc, char *argv[])
 
 	volScalarField dpdt = fvc::ddt(p);
 
-	volScalarField shPredi = combustion->Sh(); // predictor value for heat of formation
+	volScalarField shPredi = reaction->Sh();//combustion->Sh(); // predictor value for heat of formation
 	scalar Prt = 0.85;
         volScalarField alphaEff = muEff/Prt;
         solve

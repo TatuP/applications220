@@ -25,10 +25,8 @@ License
 
 #include "tatunRNG.H"
 #include "addToRunTimeSelectionTable.H"
-//#include "psiCombustionModel.H"
 
-#include "/opt/openfoam211/src/turbulenceModels/compressible/RAS/backwardsCompatibility/wallFunctions/backwardsCompatibilityWallFunctions.H"
-//#include "backwardsCompatibilityWallFunctions.H"
+#include "backwardsCompatibilityWallFunctions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +49,7 @@ tatunRNG::tatunRNG
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel,
-    //const volScalarField& M,
+    const fluidThermo& thermophysicalModel,
     const word& turbulenceModelName,
     const word& modelName
 )
@@ -191,40 +188,16 @@ tatunRNG::tatunRNG
     ),
     soundSpeed_
     (
-    	IOobject
+	IOobject
 	(
-	    "soundSpeed",
-	    runTime_.timeName(),
-	    mesh_,
-	    IOobject::MUST_READ,//MUST_READ,
-	    IOobject::AUTO_WRITE//NO_WRITE
+		"soundSpeed",
+		runTime_.timeName(),
+		mesh_,
+		IOobject::MUST_READ,
+		IOobject::AUTO_WRITE
 	),
-        mesh_
+	mesh_
     )
-    /*Tnew_
-    (
-    	IOobject
-	(
-	    "T",
-	    runTime_.timeName(),
-	    mesh_,
-	    IOobject::MUST_READ,
-	    IOobject::NO_WRITE
-	),
-        mesh_
-    ),
-    Cp_
-    (
-    	IOobject
-	(
-	    "Cp",
-	    runTime_.timeName(),
-	    mesh_,
-	    IOobject::MUST_READ,
-	    IOobject::NO_WRITE
-	),
-        mesh_
-    )*/
 {
     bound(k_, kMin_);
     bound(epsilon_, epsilonMin_);
@@ -290,6 +263,7 @@ tmp<fvVectorMatrix> tatunRNG::divDevRhoReff(volVectorField& U) const
     );
 }
 
+
 bool tatunRNG::read()
 {
     if (RASModel::read())
@@ -329,9 +303,6 @@ void tatunRNG::correct()
     }
 
     RASModel::correct();
-    
-    //Info << "max(soundSpeed) = " << max(soundSpeed_).value() << endl;
-    
 
     volScalarField divU(fvc::div(phi_/fvc::interpolate(rho_)));
 
@@ -344,7 +315,8 @@ void tatunRNG::correct()
     volScalarField S2((tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
-    volScalarField G("RASModel::G", mut_*S2);
+    //volScalarField G(type() + ".G", mut_*S2);
+    volScalarField G(GName(), mut_*S2); // changed from 2.1.1 --> 2.2.2
 
     volScalarField eta(sqrt(mag(S2))*k_/epsilon_);
     volScalarField eta3(eta*sqr(eta));
@@ -362,13 +334,11 @@ void tatunRNG::correct()
     (
         fvm::ddt(rho_, epsilon_)
       + fvm::div(phi_, epsilon_)
-      - fvm::Sp(fvc::ddt(rho_) + fvc::div(phi_), epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
       ==
         (C1_ - R)*G*epsilon_/k_
       - fvm::SuSp(((2.0/3.0)*C1_ + C3_)*rho_*divU, epsilon_)
       - fvm::Sp(C2_*rho_*epsilon_/k_, epsilon_)
-      //- fvm::Sp(2*epsilon_/airvel_, k_)
     );
 
     epsEqn().relax();
@@ -378,22 +348,17 @@ void tatunRNG::correct()
     solve(epsEqn);
     bound(epsilon_, epsilonMin_);
 
-
-    //tmp<volScalarField> tT(this->T());
-    //const volScalarField& T = tT();
-
-    // Turbulent kinetic energy equation
     volScalarField YMperk = 2.0*rho_*epsilon_/(soundSpeed_*soundSpeed_);
+    // Turbulent kinetic energy equation
+
     tmp<fvScalarMatrix> kEqn
     (
         fvm::ddt(rho_, k_)
       + fvm::div(phi_, k_)
-      - fvm::Sp(fvc::ddt(rho_) + fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(), k_)
       ==
         G - fvm::SuSp(2.0/3.0*rho_*divU, k_)
       - fvm::Sp(rho_*epsilon_/k_, k_)
-      //- fvm::Sp(2.0*rho_*epsilon/(soundSpeed_*soundSpeed_), k_)
       - fvm::Sp(YMperk, k_)
     );
 

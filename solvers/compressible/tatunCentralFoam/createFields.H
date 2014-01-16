@@ -37,14 +37,16 @@ hsCombustionThermo& thermo = chemistry.thermo(); */// tatu commented, for psiThe
 //------------------------------------------------------------------//
 
 // psiCombustion model for singleStepCombustion (single step chemistry)
-autoPtr<combustionModels::psiCombustionModel> combustion
+autoPtr<combustionModels::psiCombustionModel> reaction//combustion
 (
     combustionModels::psiCombustionModel::New
     (
         mesh
     )
 );
-hsCombustionThermo& thermo = combustion->thermo();
+//hsCombustionThermo& thermo = combustion->thermo();
+psiReactionThermo& thermo = reaction->thermo();
+thermo.validate(args.executable(), "h", "e");
 
 basicMultiComponentMixture& composition = thermo.composition();
 
@@ -55,7 +57,7 @@ word inertSpecie(thermo.lookup("inertSpecie"));
 // tatu done
 
 volScalarField& p = thermo.p();
-volScalarField& hs = thermo.hs(); // replaced e --> hs
+volScalarField& hs = thermo.he(); // replaced e --> hs
 const volScalarField& T = thermo.T();
 const volScalarField& psi = thermo.psi();
 const volScalarField& mu = thermo.mu();
@@ -164,7 +166,7 @@ autoPtr<compressible::turbulenceModel> turbulence
         thermo
     )
 );
-combustion->setTurbulence(turbulence());
+reaction->setTurbulence(turbulence());
 // tatu start: molar gas constant R because thermo.Cv is not available. needed to compute local speed of sound.
 //		also initialize Y, hs etc. 		
 const volScalarField R
